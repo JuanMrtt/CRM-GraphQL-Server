@@ -1,0 +1,18 @@
+{
+  "name": "crmgraphql",
+  "version": "1.0.0",
+  "description": "Curso sobre GraphQL",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon ."
+  },
+  "author": "Juan Antonio Martin",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^2.15.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
