@@ -1,6 +1,8 @@
 const Usuario = require('../models/Usuario')
 const Cliente = require('../models/Cliente')
 const Producto = require('../models/Producto')
+const Pedido = require('../models/Pedido')
+
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 require('dotenv').config({ path: '.env' })
@@ -207,6 +209,50 @@ const resolvers = {
             await Cliente.findOneAndDelete({ _id: id })
             return "Cliente Eliminado Con Exito"
         },
+        nuevoPedido: async (_, { input }, ctx) => {
+
+            const { cliente } = input
+
+            // Revisar si el cliente existe o no
+            let clienteExiste = await Cliente.findById(cliente)
+
+            if (!clienteExiste) {
+                throw new Error('Cliente no existe')
+            }
+
+            // Revisar si el cliente es del vendedor
+            if (clienteExiste.vendedor.toString() !== ctx.usuario.id) {
+                throw new Error('No tienes las credenciales')
+            }
+
+            // Revisar que el stock esté disponible
+
+            for await (const articulo of input.pedido) {
+
+                const { id } = articulo
+
+                const producto = await Producto.findById(id)
+
+                if (articulo.cantidad > producto.existencia) {
+                    throw new Error(`El articulo: ${producto.nombre} excede la cantidad disponible`)
+                } else {
+                    // Restar la cantidad a lo disponible
+                    producto.existencia = producto.existencia - articulo.cantidad
+                    await producto.save()
+                }
+            }
+
+            // Crear un nuevo pedido
+            const nuevoPedido = new Pedido(input)
+
+            // Asignarle a un vendedor
+            nuevoPedido.vendedor = ctx.usuario.id
+
+            // Guardarlo en base de datos
+            const resultado = await nuevoPedido.save()
+            return resultado
+
+        }
     }
 }
 
