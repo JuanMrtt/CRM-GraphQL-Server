@@ -11,16 +11,15 @@ const crearToken = (usuario, secreta, expiresIn) => {
 
     const { id, email, nombre, apellido } = usuario
 
-    return jwt.sign({ id }, secreta, { expiresIn })
+    return jwt.sign({ id, email, nombre, apellido }, secreta, { expiresIn })
+
 }
 
 // Resolvers
 const resolvers = {
     Query: {
-        obtenerUsuario: async (_, { token }) => {
-            const usuarioId = await jwt.verify(token, process.env.SECRETA)
-
-            return usuarioId
+        obtenerUsuario: async (_, { }, ctx) => {
+            return ctx.usuario
         },
         obtenerProductos: async () => {
             try {
